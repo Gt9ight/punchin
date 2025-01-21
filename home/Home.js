@@ -11,6 +11,8 @@ const Home = () => {
   const [clockInInfo, setClockInInfo] = useState(null);
   const [clockOutInfo, setClockOutInfo] = useState(null);
   const [isClockedIn, setIsClockedIn] = useState(false);
+  const [combinedInfo, setCombinedInfo] = useState('');
+  const [displayInfo, setDisplayInfo] = useState('');
   const statesList = [
     "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut",
     "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
@@ -40,18 +42,28 @@ const Home = () => {
 
   const handleClockIn = () => {
     const currentDate = new Date();
-    const formattedDate = currentDate.toLocaleDateString(); // e.g., "1/20/2025"
+    const options = { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' };
+    const formattedDate = currentDate.toLocaleDateString(undefined, options); // e.g., "Monday, 1/20/2025"
     const formattedTime = currentDate.toLocaleTimeString(); // e.g., "3:45:00 PM"
+    const clockInText = `${formattedDate}: Clock in at ${formattedTime}`;
     setClockInInfo({ date: formattedDate, time: formattedTime });
+    setDisplayInfo(clockInText); // Display clock-in info immediately
     setIsClockedIn(true);
   };
 
   const handleClockOut = () => {
     const currentDate = new Date();
-    const formattedTime = currentDate.toLocaleTimeString(); // e.g., "4:30:00 PM"
-    setClockOutInfo({ time: formattedTime });
+    const formattedTime = currentDate.toLocaleTimeString(); // e.g., "5:30PM"
+
+    if (clockInInfo) {
+      const combinedText = `${clockInInfo.date}: Clock in at ${clockInInfo.time} - Clock out at ${formattedTime}`;
+      setClockOutInfo({ time: formattedTime });
+      setDisplayInfo(combinedText); // Update the display with clock-out info
+    }
+
     setIsClockedIn(false);
   };
+  
   const openModal = () => {
     setModalVisible(true);
     Animated.timing(slideAnim, {
@@ -86,17 +98,9 @@ const Home = () => {
         <Button title="Clock Out" onPress={handleClockOut} />
       )}
 
-      {clockInInfo && (
-        <Text style={styles.infoText}>
-          Clocked in on: {clockInInfo.date} at {clockInInfo.time}
-        </Text>
-      )}
-
-      {clockOutInfo && (
-        <Text style={styles.infoText}>
-          Clocked out at: {clockOutInfo.time}
-        </Text>
-      )}
+{displayInfo && (
+          <Text style={styles.infoText}>{displayInfo}</Text>
+        )}
     </View>
 
       {/* Modal */}
